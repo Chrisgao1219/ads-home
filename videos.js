@@ -42,9 +42,4 @@ const VIDEOS = [
   { n: "38", platform: "google", group: "B2B 专题", id: "1xjJXcCzX7zFbZKFu0datyqVtyzmMiz70", title: "B2B 品牌词搜索广告系列创建演示和设置细节" },
   { n: "39", platform: "google", group: "B2B 专题", id: "1M4vkQwnFIFyNqA2YXhmAGPuhw55jr4Wj", title: "B2B 精准流量搜索广告系列创建演示和搜索广告优化思路" },
   { n: "40", platform: "google", group: "B2B 专题", id: "1eBrU1MpegQDiO8yKJ4iYmdpXz2e_ojPO", title: "B2B PMAX 广告系列的创建演示和设置细节" },
-  { n: "41", platform: "assets", group: "素材提示词课程", id: "14nRmre2pua5_Z6WNJMJFQILIopBVTsro", title: "素材提示词课程介绍" },
-  { n: "42", platform: "assets", group: "素材提示词课程", id: "1skFjDHFaHUZB2WhfTNg8H6MgPK0k7PgN", title: "爆款图片数据分析和创意发散提示词" },
-  { n: "43", platform: "assets", group: "素材提示词课程", id: "1YForhksIkzCqCnFfOT1NrnpCKahAK5ID", title: "爆款图片素材批量生成提示词" },
-  { n: "44", platform: "assets", group: "素材提示词课程", id: "1MU0x3Ewar3cdQ0UbOg2rBjsgQfKwWBuL", title: "爆款短视频数据分析和创意发散提示词" },
-  { n: "45", platform: "assets", group: "素材提示词课程", id: "1Bb2I1F8jwi-suY9-zZXzO8ui7ORBEJsK", title: "爆款视频脚本创意批量生成提示词" },
 ];

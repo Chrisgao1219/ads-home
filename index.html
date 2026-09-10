@@ -65,6 +65,20 @@
   [data-theme="light"] .icon-sun { display: none; }
   [data-theme="dark"] .icon-moon { display: none; }
 
+  /* 姊妹站点互跳 */
+  .site-link {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 13px;
+    border: 1px solid var(--border); background: var(--card); color: var(--text-dim);
+    border-radius: 999px; font-size: 13px; font-weight: 600;
+    text-decoration: none; white-space: nowrap;
+    transition: color .18s, border-color .18s;
+  }
+  .site-link:hover { color: var(--text); border-color: var(--border-strong); }
+  .site-link .site-link-mark { font-size: 14px; line-height: 1; }
+  .site-link svg { transition: transform .18s; flex-shrink: 0; }
+  .site-link:hover svg { transform: translateX(2px); }
+
   /* Hero */
   .hero {
     max-width: 1080px; margin: 0 auto; padding: 64px 24px 12px;
@@ -204,6 +218,8 @@
     .hero h1 { font-size: 29px; }
     .tabs { margin-top: 26px; padding: 0 16px; gap: 7px; }
     .tab { padding: 9px 14px; font-size: 13px; }
+    .site-link { padding: 7px 11px; }
+    .site-link .site-link-label { display: none; }
     .group-label { padding: 0 16px; margin-top: 32px; }
     .grid { padding: 14px 16px 4px; grid-template-columns: 1fr; }
     .modal { padding: 0; align-items: flex-end; }
@@ -221,6 +237,11 @@
       <span>广告学习中心</span>
     </div>
     <div class="spacer"></div>
+    <a class="site-link" href="https://ai.chrisgao1219.com/">
+      <span class="site-link-mark">🎓</span>
+      <span class="site-link-label">AI 学习中心</span>
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
     <button class="icon-btn" id="themeToggle" title="切换明暗主题" aria-label="切换明暗主题">
       <svg class="icon-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg class="icon-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -232,7 +253,7 @@
   <section class="hero">
     <span class="eyebrow">广告投放学习路径</span>
     <h1>Google 与 Meta 广告<br>从入门到进阶</h1>
-    <p>投放前准备、后台操作、广告结构搭建、素材测试，到 AI 批量产出素材——按平台分区，点开即看。</p>
+    <p>投放前准备、后台操作、广告结构搭建、素材测试与日常优化——按平台分区，点开即看。</p>
     <div class="count" id="heroCount"></div>
   </section>
 
@@ -267,8 +288,7 @@
   /* ---------- 平台配置 ---------- */
   var TABS = [
     { key: 'google', label: 'Google Ads',  color: '#ea4335' },
-    { key: 'meta',   label: 'Meta Ads',    color: '#0866ff' },
-    { key: 'assets', label: '素材提效',     color: '#7c3aed' }
+    { key: 'meta',   label: 'Meta Ads',    color: '#0866ff' }
   ];
   var COLOR = {};
   TABS.forEach(function (t) { COLOR[t.key] = t.color; });
@@ -276,8 +296,7 @@
   /* 分组展示顺序与说明 */
   var GROUP_ORDER = {
     google: ['入门必看', '广告结构', 'PMAX 系列', '搜索广告系列', '其他流量', 'B2B 专题'],
-    meta:   ['入门必看', '广告结构', '素材策略', '投放技巧', 'AI 提效'],
-    assets: ['素材提示词课程']
+    meta:   ['入门必看', '广告结构', '素材策略', '投放技巧', 'AI 提效']
   };
   var GROUP_DESC = {
     '入门必看':       '投放前先搞懂这些',
@@ -288,8 +307,7 @@
     'PMAX 系列':      '从基础必建到关键扩量',
     '搜索广告系列':    '三层漏斗逐步打开',
     '其他流量':       'Demand Gen 与购物 Feed',
-    'B2B 专题':       '从找客户到系列搭建',
-    '素材提示词课程':  '图片与视频脚本的 AI 提示词'
+    'B2B 专题':       '从找客户到系列搭建'
   };
   /* Google 侧有专属说明的分组覆盖 */
   var GROUP_DESC_OVERRIDE = {
@@ -325,8 +343,8 @@
 
   var total = 0;
   TABS.forEach(function (t) { total += DATA[t.key].length; });
-  heroCount.textContent = '🎬 共 ' + total + ' 个视频 · 分 ' +
-    TABS.map(function (t) { return t.label; }).join(' / ') + ' 三个板块';
+  heroCount.textContent = '🎬 共 ' + total + ' 个视频 · ' +
+    TABS.map(function (t) { return t.label + ' ' + DATA[t.key].length + ' 个'; }).join(' · ');
 
   TABS.forEach(function (t) {
     var b = document.createElement('button');
