@@ -5,6 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>广告学习中心</title>
 <meta name="description" content="Google Ads 与 Meta Ads 系统视频教程：投放前准备、后台操作、广告结构搭建、素材测试与日常优化，36 个视频按平台分区。">
+
+<!-- 主题预设：在首次绘制前定下明暗，避免深色模式闪白；首次访问跟随系统偏好 -->
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('ads-home-theme');
+    if (t !== 'light' && t !== 'dark') {
+      t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+
+<!-- 图标 -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111418" media="(prefers-color-scheme: dark)">
+
+<!-- 分享预览 -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="广告学习中心">
+<meta property="og:title" content="广告学习中心 · Google 与 Meta 广告教程">
+<meta property="og:description" content="投放前准备、后台操作、广告结构搭建、素材测试与日常优化，36 个视频按平台分区。">
+<meta property="og:url" content="https://ads.chrisgao1219.com/">
+<meta property="og:image" content="https://ads.chrisgao1219.com/avatar.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="广告学习中心 · Google 与 Meta 广告教程">
+<meta name="twitter:description" content="投放前准备、后台操作、广告结构搭建、素材测试与日常优化，36 个视频按平台分区。">
+<meta name="twitter:image" content="https://ads.chrisgao1219.com/avatar.jpg">
+<link rel="canonical" href="https://ads.chrisgao1219.com/">
+
 <style>
   :root {
     --accent: #334155;
@@ -44,8 +78,9 @@
   /* 顶部栏 */
   .topbar {
     position: sticky; top: 0; z-index: 100;
+    background: var(--card);                                          /* 回退：不支持 color-mix 的浏览器 */
     background: color-mix(in srgb, var(--card) 90%, transparent);
-    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--border);
   }
   .topbar-inner {
@@ -350,6 +385,8 @@
     b.className = 'tab';
     b.type = 'button';
     b.setAttribute('role', 'tab');
+    b.id = 'tab-' + t.key;
+    b.setAttribute('aria-controls', 'panel-' + t.key);
     b.dataset.platform = t.key;
     b.style.setProperty('--tab-color', t.color);
     b.innerHTML = '<span></span><span class="tab-count">' + DATA[t.key].length + '</span>';
@@ -361,6 +398,9 @@
   TABS.forEach(function (t) {
     var panel = document.createElement('div');
     panel.className = 'panel';
+    panel.id = 'panel-' + t.key;
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', 'tab-' + t.key);
     panel.dataset.platform = t.key;
     panel.style.setProperty('--panel-color', t.color);
 
@@ -414,6 +454,7 @@
     var title = document.createElement('span');
     title.className = 'card-title';
     title.textContent = st.main;
+    title.setAttribute('title', v.title);   /* 标题被 2 行截断时，悬停可看全文 */
     body.appendChild(title);
     if (st.sub) {
       var sub = document.createElement('span');
@@ -433,13 +474,16 @@
   }
 
   /* ---------- 平台切换逻辑 ---------- */
-  function selectPlatform(key) {
+  function selectPlatform(key, focusTab) {
     if (!DATA[key]) key = TABS[0].key;
     Array.prototype.forEach.call(tabsEl.children, function (b) {
-      b.setAttribute('aria-selected', String(b.dataset.platform === key));
+      var on = b.dataset.platform === key;
+      b.setAttribute('aria-selected', String(on));
+      b.tabIndex = on ? 0 : -1;          /* roving tabindex：只有当前页签能被 Tab 键聚焦 */
+      if (on && focusTab) b.focus();
     });
     Array.prototype.forEach.call(panelsEl.children, function (p) {
-      p.style.display = (p.dataset.platform === key) ? '' : 'none';
+      p.hidden = p.dataset.platform !== key;
     });
     try { localStorage.setItem('ads-home-platform', key); } catch (e) {}
   }
@@ -447,6 +491,21 @@
   tabsEl.addEventListener('click', function (e) {
     var btn = e.target.closest('.tab');
     if (btn) selectPlatform(btn.dataset.platform);
+  });
+
+  /* 方向键 / Home / End 切换页签（WAI-ARIA Tabs 模式） */
+  tabsEl.addEventListener('keydown', function (e) {
+    if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(e.key) === -1) return;
+    var list = Array.prototype.slice.call(tabsEl.children);
+    var i = list.indexOf(document.activeElement);
+    if (i === -1) return;
+    e.preventDefault();
+    var n = list.length;
+    var next = e.key === 'ArrowLeft'  ? (i - 1 + n) % n
+             : e.key === 'ArrowRight' ? (i + 1) % n
+             : e.key === 'Home'       ? 0
+             :                          n - 1;
+    selectPlatform(list[next].dataset.platform, true);
   });
 
   var savedPlatform = null;
@@ -496,17 +555,37 @@
     if (e.target.hasAttribute('data-close')) closeVideo();
   });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeVideo();
+    if (e.key === 'Escape') { closeVideo(); return; }
+    if (e.key !== 'Tab' || !modal.classList.contains('open')) return;
+
+    /* 焦点陷阱：Tab 只在弹窗内循环，不会跑到背后的页面上。
+       只圈 button，不圈 iframe —— 否则用户点进播放器后无法用键盘操作它 */
+    var f = modal.querySelectorAll('button');
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (!modal.contains(document.activeElement)) {
+      e.preventDefault(); first.focus();
+    } else if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault(); first.focus();
+    }
   });
 
   /* ---------- 明暗主题 ---------- */
   var themeToggle = document.getElementById('themeToggle');
-  var savedTheme = null;
-  try { savedTheme = localStorage.getItem('ads-home-theme'); } catch (e) {}
-  if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+  /* 主题已由 <head> 的预设脚本定好，这里只把状态同步给辅助技术 */
+  function syncThemeButton() {
+    themeToggle.setAttribute('aria-pressed',
+      String(document.documentElement.getAttribute('data-theme') === 'dark'));
+  }
+  syncThemeButton();
+
   themeToggle.addEventListener('click', function () {
     var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', cur);
+    syncThemeButton();
     try { localStorage.setItem('ads-home-theme', cur); } catch (e) {}
   });
 })();
